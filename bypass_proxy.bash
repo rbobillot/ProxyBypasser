@@ -63,17 +63,17 @@ configure_ssh_config() {
 	read df
 	[[ $df ]] && dynamic_forward="$df"
 
-	printf "\e[93m\nThe proxy hostname\e[0m [$proxy_host]: "
+	printf "\e[93m\nYour ssh host\e[0m [$ssh_host]: "
+	read s_host
+	[[ $s_host ]] && ssh_host="$s_host"
+
+	printf "\e[93mThe proxy hostname\e[0m [$proxy_host]: "
 	read p_host
 	[[ $p_host ]] && proxy_host="$p_host"
 
 	printf "\e[93mThe proxy port\e[0m [$proxy_port]: "
 	read p_port
 	[[ $p_port ]] && proxy_port="$p_port"
-
-	printf "\e[93mYour ssh host\e[0m [$ssh_host]: "
-	read s_host
-	[[ $s_host ]] && ssh_host="$s_host"
 
 	echo -e "
 Host $ssh_host
