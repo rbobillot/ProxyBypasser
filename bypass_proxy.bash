@@ -111,7 +111,7 @@ install_binaries() {
 }
 
 bypass_proxy() {
-	printf "\e[93mFirst of all, you need an SSH access to a distant server,\n"
+	printf "\ec\e[93mFirst of all, you need an SSH access to a distant server,\n"
 	printf "it must be listening on a port that is not 22.\n\n"
 	printf "Also, you need to have Firefox installed (\e[91mwhich will be killed before setup\e[93m).\n\n"
 	printf "Are you good to go ?\e[0m (y/n) "
