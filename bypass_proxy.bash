@@ -35,7 +35,7 @@ set_server_hostname() {
 	printf "\e[96mYour server's hostname (IP or domain):\e[0m "
 	read s_hostname && [[ $s_hostname ]] && hostname=$s_hostname || set_server_hostname
 	[[ `curl -s --head $hostname | grep 404` ]] \
-		&& printf "\e[91mError: $hostname: cannot resolve hostname\e[0m" \
+		&& printf "\e[91mError: $hostname: cannot resolve hostname\e[0m\n" \
 		&& set_server_hostname
 }
 
