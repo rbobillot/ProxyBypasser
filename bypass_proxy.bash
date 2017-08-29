@@ -66,12 +66,12 @@ configure_ssh_config() {
 	printf "\e[93mThe proxy port\e[0m [$proxy_port]: "
 	read p_port && [[ $p_port ]] && proxy_port="$p_port"
 
-	echo "Host $ssh_host"                    >> $ssh_config_file && \
-	echo "  HostName $hostname"              >> $ssh_config_file && \
-	echo "  Port $port"                      >> $ssh_config_file && \
-	echo "  User $user"                      >> $ssh_config_file && \
-	echo "  DynamicForward $dynamic_forward" >> $ssh_config_file && \
-	echo "  ProxyCommand corkscrew $proxy_host $proxy_port %h %p $cork_config_file\n" >> $ssh_config_file \
+	echo -e "\nHost $ssh_host"                  >> $ssh_config_file && \
+	echo -e "  HostName $hostname"              >> $ssh_config_file && \
+	echo -e "  Port $port"                      >> $ssh_config_file && \
+	echo -e "  User $user"                      >> $ssh_config_file && \
+	echo -e "  DynamicForward $dynamic_forward" >> $ssh_config_file && \
+	echo -e "  ProxyCommand corkscrew $proxy_host $proxy_port %h %p $cork_config_file\n" >> $ssh_config_file \
 		&& printf "\e[92mSSH config file (\e[0m$ssh_config_file\e[92m) correctly filled\e[0m\n\n" \
 		|| (printf "\e[91mSomething went wrong while filling SSH config file\e[0m\n" && ls /nop 2> /dev/null)
 }
