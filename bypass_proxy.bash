@@ -32,7 +32,7 @@ configure_cork_auth() {
 }
 
 set_server_hostname() {
-	printf "\e[96m\nYour server's hostname (IP or domain):\e[0m "
+	printf "\e[96mYour server's hostname (IP or domain):\e[0m "
 	read s_hostname && [[ $s_hostname ]] && hostname=$s_hostname || set_server_hostname
 	[[ `curl -s --head $hostname | grep 404` ]] \
 		&& printf "\e[91mError: $hostname: cannot resolve hostname\e[0m" \
@@ -107,6 +107,7 @@ install_binaries() {
 	[[ `which brew` ]]      && manager="brew"
 	[[ `which curl` ]]      && echo "curl is already installed"      || sudo $manager install curl
 	[[ `which corkscrew` ]] && echo "corkscrew is already installed" || sudo $manager install corkscrew
+	echo
 }
 
 bypass_proxy() {
