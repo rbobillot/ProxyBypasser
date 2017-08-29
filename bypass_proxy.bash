@@ -21,12 +21,10 @@ read proxy_login proxy_password proxy_host proxy_port <<< `echo $proxy`
 
 configure_cork_auth() {
 	printf "\e[93mYour proxy login\e[0m [$proxy_login]: "
-	read p_login
-	[[ $p_login ]] && proxy_login="$p_login"
+	read p_login && [[ $p_login ]] && proxy_login="$p_login"
 
 	printf "\e[93mYour proxy password\e[0m [$proxy_password]: "
-	read p_password
-	[[ $p_password ]] && proxy_password="$p_password"
+	read p_password && [[ $p_password ]] && proxy_password="$p_password"
 
 	echo "$proxy_login:$proxy_password" > $cork_config_file \
 		&& printf "\e[92mCork config file (\e[0m$cork_config_file\e[92m) correctly filled\e[0m\n" \
@@ -35,8 +33,7 @@ configure_cork_auth() {
 
 set_server_hostname() {
 	printf "\e[96m\nYour server's hostname (IP or domain):\e[0m "
-	read s_hostname
-	[[ $s_hostname ]] && hostname=$s_hostname || set_server_hostname
+	read s_hostname && [[ $s_hostname ]] && hostname=$s_hostname || set_server_hostname
 	[[ `curl -s --head $hostname | grep 404` ]] \
 		&& printf "\e[91mError: $hostname: cannot resolve hostname\e[0m" \
 		&& set_server_hostname
@@ -44,14 +41,12 @@ set_server_hostname() {
 
 set_server_port() {
 	printf "\e[96mIts custom SSH listening port:\e[0m "
-	read s_port
-	[[ $s_port ]] && port=$s_port || set_server_port
+	read s_port && [[ $s_port ]] && port=$s_port || set_server_port
 }
 
 set_server_username() {
 	printf "\e[96mYour SSH username:\e[0m "
-	read s_username
-	[[ $s_username ]] && user=$s_username || set_server_username
+	read s_username && [[ $s_username ]] && user=$s_username || set_server_username
 }
 
 configure_ssh_config() {
@@ -60,28 +55,23 @@ configure_ssh_config() {
 	set_server_username
 
 	printf "\e[96mThe dynamic forward port you want\e[0m [$dynamic_forward]: "
-	read df
-	[[ $df ]] && dynamic_forward="$df"
+	read df && [[ $df ]] && dynamic_forward="$df"
 
 	printf "\e[93m\nYour ssh host\e[0m [$ssh_host]: "
-	read s_host
-	[[ $s_host ]] && ssh_host="$s_host"
+	read s_host && [[ $s_host ]] && ssh_host="$s_host"
 
 	printf "\e[93mThe proxy hostname\e[0m [$proxy_host]: "
-	read p_host
-	[[ $p_host ]] && proxy_host="$p_host"
+	read p_host && [[ $p_host ]] && proxy_host="$p_host"
 
 	printf "\e[93mThe proxy port\e[0m [$proxy_port]: "
-	read p_port
-	[[ $p_port ]] && proxy_port="$p_port"
+	read p_port && [[ $p_port ]] && proxy_port="$p_port"
 
-	echo -e "
-Host $ssh_host
-  HostName $hostname
-  Port $port
-  User $user
-  DynamicForward $dynamic_forward
-  ProxyCommand corkscrew $proxy_host $proxy_port %h %p $cork_config_file\n" >> $ssh_config_file \
+	echo "Host $ssh_host"                    >> $ssh_config_file && \
+	echo "  HostName $hostname"              >> $ssh_config_file && \
+	echo "  Port $port"                      >> $ssh_config_file && \
+	echo "  User $user"                      >> $ssh_config_file && \
+	echo "  DynamicForward $dynamic_forward" >> $ssh_config_file && \
+	echo "  ProxyCommand corkscrew $proxy_host $proxy_port %h %p $cork_config_file\n" >> $ssh_config_file \
 		&& printf "\e[92mSSH config file (\e[0m$ssh_config_file\e[92m) correctly filled\e[0m\n\n" \
 		|| (printf "\e[91mSomething went wrong while filling SSH config file\e[0m\n" && ls /nop 2> /dev/null)
 }
@@ -113,9 +103,9 @@ launch_test_ssh_connection() {
 install_binaries() {
 	printf "\e[33m\nInstalling needed binaries\e[0m...\n"
 	manager="apt-get"
-	[[ `which apt` ]] && manager="apt"
-	[[ `which brew` ]] && manager="brew"
-	[[ `which curl` ]] && echo "curl is already installed" || sudo $manager install curl
+	[[ `which apt` ]]       && manager="apt"
+	[[ `which brew` ]]      && manager="brew"
+	[[ `which curl` ]]      && echo "curl is already installed"      || sudo $manager install curl
 	[[ `which corkscrew` ]] && echo "corkscrew is already installed" || sudo $manager install corkscrew
 }
 
