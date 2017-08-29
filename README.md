@@ -4,7 +4,11 @@ A Linux Bash Script to connect via SSH through proxy, and allow unlimited web br
 ---
 
 ## Run with:
-```$> bash bypass_proxy.bash```
+```
+bash <(curl -sSL https://goo.gl/PDqiRb)
+```
+or clone the repo, and just run with:
+```bash bypass_proxy.bash```
 
 ---
 
@@ -29,5 +33,5 @@ So I did this little script, that will install and configure corscrew and Firefo
     * 2 files will be filled: ~/.ssh/cork.auth (with this: "proxy_user:proxy_pass"), ~/.ssh/config (with infos about your server, and your proxy)
     * It will kill Firefox, and configure its proxy settings (Preferences > Advanced > Network > Settings), by modifying the file: `~/.mozilla/firefox/*.default/prefs.js`
     * Finally, Firefox will be relaunched (in a back-process), and the script will connect your server via SSH. YOU MUST CONNECT (enter your SSH password) in terminal, before using Firefox
-    
+
 Enjoy :)
