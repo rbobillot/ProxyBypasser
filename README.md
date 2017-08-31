@@ -5,7 +5,7 @@ A Linux Bash Script to connect via SSH through proxy, and allow unlimited web br
 
 ## Run with:
 ```
-bash <(curl -sSL https://goo.gl/PDqiRb)
+bash -c "$(curl -sSL https://goo.gl/PDqiRb)"
 ```
 or clone the repo, and just run with:
 ```bash bypass_proxy.bash```
