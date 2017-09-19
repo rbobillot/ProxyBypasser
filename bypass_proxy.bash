@@ -51,22 +51,64 @@ set_server_username() {
 	read s_username && [[ $s_username ]] && user=$s_username || set_server_username
 }
 
+check_ssh_config_availability() {
+	[[ `grep $1 $ssh_config_file` != "" ]] && printf "$1 - \033[91mnot available\033[0m"
+}
+
+set_dynamic_forward() {
+	c_dynamic_forward=$dynamic_forward
+	[[ `grep $dynamic_forward $ssh_config_file` != "" ]] && c_dynamic_forward="$dynamic_forward - \033[91mnot available\033[0m"
+	printf "\e[96mThe dynamic forward (internet vpn) port you want\e[0m [$c_dynamic_forward]: "
+	read df && [[ $df ]] && dynamic_forward="$df"
+}
+
+set_remote_forward() {
+	c_remote_forward=$remote_forward
+	[[ `grep $remote_forward $ssh_config_file` != "" ]] && c_remote_forward="$remote_forward - \033[91mnot available\033[0m"
+	printf "\e[96mThe remote forward (reverse ssh tunnel) port you want\e[0m [$c_remote_forward]: "
+	read rf && [[ $rf ]] && remote_forward="$rf"
+}
+
+set_ssh_host() {
+	c_ssh_host=$ssh_host
+	[[ `grep $ssh_host $ssh_config_file` != "" ]] && c_ssh_host="$ssh_host - \033[91mnot available\033[0m"
+	printf "\e[93m\nYour ssh host\e[0m [$c_ssh_host]: "
+	read s_host && [[ $s_host ]] && ssh_host="$s_host"
+}
+
+check_local_ssh_port_availability() {
+	nc -z localhost $1
+	[[ $? -eq 1 ]] && c_local_ssh=`printf "$1 - \033[91mnot available\033[0m"`
+}
+
+setup_reverse_tunnel() {
+	choice="y"
+	printf "Do you want to configure a reverse SSH tunnel ? [Y/n] "
+	read c
+	[[ $c ]] && choice=`printf $c | tr '[:upper:]' '[:lower:]'`
+	if [[ $choice == "n" ]] ; then exit
+	elif [[ $choice == "y" ]] ; then
+		set_remote_forward
+
+		c_local_ssh=$local_ssh
+		check_local_ssh_port_availability $c_local_ssh
+		# if $local_ssh port is not listening, $c_local_ssh will be red, else white
+		printf "\e[96mThe ssh listening port of your localhost\e[0m [$c_local_ssh]: "
+		read ls && [[ $ls ]] && local_ssh="$ls"
+	else setup_reverse_tunnel
+	fi
+}
+
 configure_ssh_config() {
 	set_server_hostname
 	set_server_port
 	set_server_username
 
-	printf "\e[96mThe dynamic forward (ssh tunnel) port you want\e[0m [$dynamic_forward]: "
-	read df && [[ $df ]] && dynamic_forward="$df"
+	set_dynamic_forward
 
-	printf "\e[96mThe remote forward (reverse tunnel) port you want\e[0m [$remote_forward]: "
-	read rf && [[ $rf ]] && remote_forward="$rf"
+	setup_reverse_tunnel
 
-	printf "\e[96mThe local ssh listening port of your localhost\e[0m [$local_ssh]: "
-	read ls && [[ $ls ]] && local_ssh="$ls"
-
-	printf "\e[93m\nYour ssh host\e[0m [$ssh_host]: "
-	read s_host && [[ $s_host ]] && ssh_host="$s_host"
+	set_ssh_host
 
 	printf "\e[93mThe proxy hostname\e[0m [$proxy_host]: "
 	read p_host && [[ $p_host ]] && proxy_host="$p_host"
@@ -126,7 +168,7 @@ bypass_proxy() {
 	printf "Are you good to go ?\e[0m [Y/n] "
 	answer='y'
 	read ans
-	[[ $ans ]] && answer=$ans
+	[[ $ans ]] && answer=`printf $ans | tr '[:upper:]' '[:lower:]'`
 
 	if [[ $answer == 'y' ]]; then
 		mkdir -p "$HOME/.ssh"
