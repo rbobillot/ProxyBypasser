@@ -14,9 +14,11 @@ user=""
 ssh_host="bypass"
 
 dynamic_forward=4243
+remote_forward=4242
+local_ssh=22
 
 noproxy=$(env | grep -i no_proxy | head -1 | cut -d '=' -f2)
-proxy=$(env | grep -i http_proxy | sed -e "s/.*=http:\/\/\(.*\):\(.*\)@\(.*\):\(.*\)/\1 \2 \3 \4/g")
+proxy=$(env | grep -i http_proxy | head -1 | sed -e "s/.*=http:\/\/\(.*\):\(.*\)@\(.*\):\(.*\)/\1 \2 \3 \4/g")
 read proxy_login proxy_password proxy_host proxy_port <<< `echo $proxy`
 
 configure_cork_auth() {
@@ -54,8 +56,14 @@ configure_ssh_config() {
 	set_server_port
 	set_server_username
 
-	printf "\e[96mThe dynamic forward port you want\e[0m [$dynamic_forward]: "
+	printf "\e[96mThe dynamic forward (ssh tunnel) port you want\e[0m [$dynamic_forward]: "
 	read df && [[ $df ]] && dynamic_forward="$df"
+
+	printf "\e[96mThe remote forward (reverse tunnel) port you want\e[0m [$remote_forward]: "
+	read rf && [[ $rf ]] && remote_forward="$rf"
+
+	printf "\e[96mThe local ssh listening port of your localhost\e[0m [$local_ssh]: "
+	read ls && [[ $ls ]] && local_ssh="$ls"
 
 	printf "\e[93m\nYour ssh host\e[0m [$ssh_host]: "
 	read s_host && [[ $s_host ]] && ssh_host="$s_host"
@@ -66,11 +74,12 @@ configure_ssh_config() {
 	printf "\e[93mThe proxy port\e[0m [$proxy_port]: "
 	read p_port && [[ $p_port ]] && proxy_port="$p_port"
 
-	echo -e "\nHost $ssh_host"                  >> $ssh_config_file && \
-	echo -e "  HostName $hostname"              >> $ssh_config_file && \
-	echo -e "  Port $port"                      >> $ssh_config_file && \
-	echo -e "  User $user"                      >> $ssh_config_file && \
-	echo -e "  DynamicForward $dynamic_forward" >> $ssh_config_file && \
+	echo -e "\nHost $ssh_host"                                     >> $ssh_config_file && \
+	echo -e "  HostName $hostname"                                 >> $ssh_config_file && \
+	echo -e "  Port $port"                                         >> $ssh_config_file && \
+	echo -e "  User $user"                                         >> $ssh_config_file && \
+	echo -e "  DynamicForward $dynamic_forward"                    >> $ssh_config_file && \
+	echo -e "  RemoteForward $remote_forward localhost:$local_ssh" >> $ssh_config_file && \
 	echo -e "  ProxyCommand corkscrew $proxy_host $proxy_port %h %p $cork_config_file\n" >> $ssh_config_file \
 		&& printf "\e[92mSSH config file (\e[0m$ssh_config_file\e[92m) correctly filled\e[0m\n\n" \
 		|| (printf "\e[91mSomething went wrong while filling SSH config file\e[0m\n" && ls /nop 2> /dev/null)
@@ -79,7 +88,7 @@ configure_ssh_config() {
 update_firefox_settings() {
 	ff_conf_file=`find $HOME -type f -iname 'prefs.js' | grep 'mozilla/firefox'`
 	if [[ -f $ff_conf_file ]] ; then
-		kill -9 `pgrep firefox` > /dev/null 2>&1
+		sudo kill -9 `pgrep firefox` > /dev/null 2>&1
 		printf "\e[95m\nSetting firefox to connect via dynamic forward...\e[0m\n"
 		up_mode=1
 		up_host=localhost
@@ -114,8 +123,10 @@ bypass_proxy() {
 	printf "\ec\e[93mFirst of all, you need an SSH access to a distant server,\n"
 	printf "it must be listening on a port that is not 22.\n\n"
 	printf "Also, you need to have Firefox installed (\e[91mwhich will be killed before setup\e[93m).\n\n"
-	printf "Are you good to go ?\e[0m (y/n) "
-	read answer
+	printf "Are you good to go ?\e[0m [Y/n] "
+	answer='y'
+	read ans
+	[[ $ans ]] && answer=$ans
 
 	if [[ $answer == 'y' ]]; then
 		mkdir -p "$HOME/.ssh"
