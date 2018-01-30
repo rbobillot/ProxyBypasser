@@ -16,7 +16,7 @@ ssh_host="bypass"
 dynamic_forward=4243
 
 noproxy=$(env | grep -i no_proxy | head -1 | cut -d '=' -f2)
-proxy=$(env | grep -i http_proxy | sed -e "s/.*=http:\/\/\(.*\):\(.*\)@\(.*\):\(.*\)/\1 \2 \3 \4/g")
+proxy=$(env | grep -i http_proxy | head -1 |  sed -e "s/.*=http:\/\/\(.*\):\(.*\)@\(.*\):\(.*\)/\1 \2 \3 \4/g")
 read proxy_login proxy_password proxy_host proxy_port <<< `echo $proxy`
 
 configure_cork_auth() {
